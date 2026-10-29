@@ -23,7 +23,7 @@ components.html("""
   </div>
 
   <div id="flowerText" style="display:none; position:absolute; top:10%; left:50%; transform:translateX(-50%); color:#ffb0d0; font-family:Georgia; font-style:italic; font-size:18px; text-align:center; z-index:10; text-shadow:0 0 15px #ff8ab0; width:90%;">This flower is for you,<br>beautiful girl 🌸</div>
-  <div id="backBtn" style="display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#666; cursor:pointer; font-size:12px; z-index:10;">← Back</div>
+  <div id="backBtn" style="display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#888; cursor:pointer; font-size:12px; z-index:10;">← Back</div>
   <div id="loveText" style="position:absolute; top:68%; left:50%; transform:translate(-50%,-50%); color:#fff8dc; font-family:Georgia; font-weight:bold; font-size:28px; text-align:center; opacity:0; transition:1s; z-index:5;">LOVE<br>YOU.</div>
 </div>
 
@@ -43,16 +43,13 @@ function drawFlowerBloom(){
   document.getElementById('flowerText').style.display='block';
   const cx=canvas.width/2;
   const cy=canvas.height/2 + 40;
-  
   let petalIndex=0;
   const totalPetals=16;
-  
   function drawPetal(angle, scale){
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angle);
     ctx.beginPath();
-    // Bentuk kelopak sunflower peach rose
     ctx.ellipse(0, -90*scale, 28*scale, 85*scale, 0, 0, Math.PI*2);
     let grad=ctx.createRadialGradient(0,-90*scale,10,0,-90*scale,80);
     grad.addColorStop(0,'#FFDAB9');
@@ -65,10 +62,8 @@ function drawFlowerBloom(){
     ctx.shadowBlur=0;
     ctx.restore();
   }
-  
   function bloom(){
     if(petalIndex>=totalPetals){
-      // tengah bunga sunflower
       ctx.beginPath();
       ctx.arc(cx, cy, 45, 0, Math.PI*2);
       let g=ctx.createRadialGradient(cx-10, cy-10, 5, cx, cy, 45);
@@ -80,8 +75,6 @@ function drawFlowerBloom(){
       ctx.shadowBlur=20;
       ctx.fill();
       ctx.shadowBlur=0;
-      
-      // titik-titik biji
       for(let i=0;i<80;i++){
         let a=Math.random()*Math.PI*2;
         let r=Math.random()*35;
@@ -96,11 +89,9 @@ function drawFlowerBloom(){
     let scale=0.6 + (petalIndex/totalPetals)*0.5;
     drawPetal(angle, scale);
     petalIndex++;
-    setTimeout(bloom, 90); // CEPET! 0.09 detik per kelopak
+    setTimeout(bloom, 90);
   }
   bloom();
-  
-  // batang
   setTimeout(()=>{
     ctx.beginPath();
     ctx.moveTo(cx, cy+45);
@@ -113,15 +104,4 @@ function drawFlowerBloom(){
 }
 
 function drawLove(){
-  clearAll();
-  let pts=[]; for(let t=0;t<Math.PI*2;t+=0.06){ let x=16*Math.pow(Math.sin(t),3); let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); pts.push({x,y}); }
-  let i=0; let scale=16;
-  function d(){ if(i>=pts.length){ document.getElementById('loveText').style.opacity=1; return; } let p=pts[i]; ctx.fillStyle="#ff2a5e"; ctx.font="bold 9px Courier New"; ctx.textAlign="center"; ctx.fillText("I LOVE YOU", canvas.width/2+p.x*scale, canvas.height/2+p.y*scale-80); i++; setTimeout(d,50); } d();
-}
-
-document.getElementById('openBtn').onclick=()=>{ document.getElementById('layer1').style.display='none'; document.getElementById('layer2').style.display='block'; };
-document.getElementById('gift1').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawFlowerBloom(); document.getElementById('backBtn').style.display='block'; };
-document.getElementById('gift2').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawLove(); document.getElementById('backBtn').style.display='block'; };
-document.getElementById('backBtn').onclick=()=>{ clearAll(); document.getElementById('backBtn').style.display='none'; document.getElementById('layer2').style.display='block'; };
-</script>
-""", height=820)8
+  clear
