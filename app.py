@@ -1,66 +1,55 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="LOVE YOU ❤️", page_icon="❤️", layout="centered")
 
-st.markdown("""
-<style>
-.stApp { background-color: black !important; }
-header, footer { visibility: hidden; }
-</style>
+# Sembunyiin menu streamlit biar full hitam
+st.markdown("<style>header, footer, .stAppDeployButton {visibility:hidden;} .stApp {background:black;}</style>", unsafe_allow_html=True)
 
-<canvas id="canvas" style="width:100%; height:85vh; background:black; display:block;"></canvas>
-<div id="love" style="position:fixed; top:52%; left:50%; transform:translate(-50%,-50%); color:white; font-family: 'Times New Roman', serif; font-size: 28px; letter-spacing: 2px; opacity:0; transition: opacity 2s;">LOVE YOU.</div>
-
+components.html(
+"""
+<div style="background:black; width:100%; height:600px; position:relative; overflow:hidden;">
+  <canvas id="c" style="width:100%; height:100%;"></canvas>
+  <div id="txt" style="position:absolute; top:55%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; font-family:serif; opacity:0; transition:2s;">LOVE YOU.</div>
+</div>
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight * 0.85;
-
-let points = [];
-for(let t=0; t<Math.PI*2; t+=0.01){
-  let x = 16 * Math.pow(Math.sin(t), 3);
-  let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-  points.push({x,y});
-}
-
-let idx = 0;
-let scale = Math.min(canvas.width, canvas.height) / 35;
-
-function draw(){
-  if(idx >= points.length){
-    document.getElementById('love').style.opacity = '1';
-    return;
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  const txt = document.getElementById('txt');
+  
+  function setup(){
+    c.width = c.clientWidth * 2;
+    c.height = c.clientHeight * 2;
   }
-  ctx.fillStyle = 'black';
-  if(idx==0) ctx.fillRect(0,0,canvas.width,canvas.height);
+  setup();
   
-  let p = points[idx];
-  let cx = canvas.width/2 + p.x * scale;
-  let cy = canvas.height/2 + p.y * scale - 40;
+  let pts=[];
+  for(let t=0; t<6.28; t+=0.01){
+    let x = 16*Math.pow(Math.sin(t),3);
+    let y = 13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+    pts.push([x,-y]);
+  }
   
-  ctx.beginPath();
-  ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
-  ctx.fillStyle = '#ff0015';
-  ctx.shadowColor = '#ff0015';
-  ctx.shadowBlur = 15;
-  ctx.fill();
-  
-  // glow trail
-  ctx.beginPath();
-  ctx.arc(cx, cy, 1.5, 0, Math.PI*2);
-  ctx.fillStyle = '#ff8a9a';
-  ctx.fill();
-
-  idx += 2;
-  requestAnimationFrame(draw);
-}
-draw();
-
-window.onresize = () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight * 0.85;
-  scale = Math.min(canvas.width, canvas.height) / 35;
-}
+  let i=0;
+  function anim(){
+    if(i>=pts.length){ txt.style.opacity=1; return; }
+    
+    let scale = Math.min(c.width, c.height) / 40;
+    let x = c.width/2 + pts[i][0]*scale;
+    let y = c.height/2 + pts[i][1]*scale - 50;
+    
+    ctx.fillStyle = "#ff0033";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#ff0033";
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI*2);
+    ctx.fill();
+    
+    i++;
+    requestAnimationFrame(anim);
+  }
+  anim();
 </script>
-""", unsafe_allow_html=True)
+""",
+height=620
+)
