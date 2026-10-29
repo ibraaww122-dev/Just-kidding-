@@ -2,9 +2,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Gift from IBRA 🎁", page_icon="🎁", layout="centered")
-st.markdown("<style>.stApp{background:black;} header,footer{visibility:hidden;}</style>", unsafe_allow_html=True)
+st.markdown('<style>.stApp{background:black;} header,footer{visibility:hidden;}</style>', unsafe_allow_html=True)
 
-components.html("""
+html_code = '''
 <div style="background:black; width:100%; height:800px; position:relative; overflow:hidden;">
   <canvas id="c" style="width:100%; height:100%; position:absolute; top:0; left:0;"></canvas>
   
@@ -31,13 +31,11 @@ components.html("""
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
 canvas.width=600; canvas.height=800;
-
 function clearAll(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   document.getElementById('loveText').style.opacity=0;
   document.getElementById('flowerText').style.display='none';
 }
-
 function drawFlowerBloom(){
   clearAll();
   document.getElementById('flowerText').style.display='block';
@@ -75,18 +73,10 @@ function drawFlowerBloom(){
       ctx.shadowBlur=20;
       ctx.fill();
       ctx.shadowBlur=0;
-      for(let i=0;i<80;i++){
-        let a=Math.random()*Math.PI*2;
-        let r=Math.random()*35;
-        ctx.beginPath();
-        ctx.arc(cx+Math.cos(a)*r, cy+Math.sin(a)*r, 1.5,0,Math.PI*2);
-        ctx.fillStyle='#3E2723';
-        ctx.fill();
-      }
       return;
     }
-    let angle=(petalIndex/totalPetals)*Math.PI*2;
-    let scale=0.6 + (petalIndex/totalPetals)*0.5;
+    let angle=(petalIndex/totalPetals)*6.283;
+    let scale=0.7 + (petalIndex/totalPetals)*0.4;
     drawPetal(angle, scale);
     petalIndex++;
     setTimeout(bloom, 90);
@@ -95,13 +85,24 @@ function drawFlowerBloom(){
   setTimeout(()=>{
     ctx.beginPath();
     ctx.moveTo(cx, cy+45);
-    ctx.lineTo(cx, canvas.height-50);
+    ctx.lineTo(cx, 780);
     ctx.strokeStyle='#4A7C59';
     ctx.lineWidth=8;
     ctx.lineCap='round';
     ctx.stroke();
-  }, totalPetals*90 + 100);
+  }, 1600);
 }
-
 function drawLove(){
-  clear
+  clearAll();
+  let pts=[]; for(let t=0;t<6.283;t+=0.06){ let x=16*Math.pow(Math.sin(t),3); let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); pts.push({x:x,y:y}); }
+  let i=0; let scale=16;
+  function d(){ if(i>=pts.length){ document.getElementById('loveText').style.opacity=1; return; } let p=pts[i]; ctx.fillStyle="#ff2a5e"; ctx.font="bold 9px Courier New"; ctx.textAlign="center"; ctx.fillText("I LOVE YOU", canvas.width/2+p.x*scale, canvas.height/2+p.y*scale-80); i++; setTimeout(d,50); } d();
+}
+document.getElementById('openBtn').onclick=()=>{ document.getElementById('layer1').style.display='none'; document.getElementById('layer2').style.display='block'; };
+document.getElementById('gift1').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawFlowerBloom(); document.getElementById('backBtn').style.display='block'; };
+document.getElementById('gift2').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawLove(); document.getElementById('backBtn').style.display='block'; };
+document.getElementById('backBtn').onclick=()=>{ clearAll(); document.getElementById('backBtn').style.display='none'; document.getElementById('layer2').style.display='block'; };
+</script>
+'''
+
+components.html(html_code, height=820)
