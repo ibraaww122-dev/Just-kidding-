@@ -4,63 +4,63 @@ st.set_page_config(page_title="LOVE YOU ❤️", page_icon="❤️", layout="cen
 
 st.markdown("""
 <style>
-body { background-color: black; }
-.heart-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-  flex-direction: column;
-}
-.heart {
-  width: 250px;
-  height: 250px;
-  position: relative;
-  animation: heartbeat 1s infinite;
-}
-.heart::before, .heart::after {
-  content: "";
-  width: 130px;
-  height: 200px;
-  position: absolute;
-  border: 3px solid #ff4b6e;
-  border-radius: 130px 130px 0 0;
-  background: transparent;
-}
-.heart::before {
-  left: 120px;
-  transform: rotate(-45deg);
-  transform-origin: 0 100%;
-}
-.heart::after {
-  left: 0px;
-  transform: rotate(45deg);
-  transform-origin: 100% 100%;
-}
-.text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -20%);
-  color: white;
-  font-size: 28px;
-  font-weight: bold;
-  z-index: 10;
-  letter-spacing: 2px;
-}
-@keyframes heartbeat {
-  0% { transform: scale(1); }
-  15% { transform: scale(1.15); }
-  30% { transform: scale(1); }
-  45% { transform: scale(1.15); }
-  60% { transform: scale(1); }
-}
+.stApp { background-color: black !important; }
+header, footer { visibility: hidden; }
 </style>
 
-<div class="heart-container">
-  <div class="heart">
-    <div class="text">LOVE YOU.</div>
-  </div>
-  <p style="color: gray; margin-top: 40px;">Sentuh hatinya ✨</p>
-</div>
+<canvas id="canvas" style="width:100%; height:85vh; background:black; display:block;"></canvas>
+<div id="love" style="position:fixed; top:52%; left:50%; transform:translate(-50%,-50%); color:white; font-family: 'Times New Roman', serif; font-size: 28px; letter-spacing: 2px; opacity:0; transition: opacity 2s;">LOVE YOU.</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight * 0.85;
+
+let points = [];
+for(let t=0; t<Math.PI*2; t+=0.01){
+  let x = 16 * Math.pow(Math.sin(t), 3);
+  let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  points.push({x,y});
+}
+
+let idx = 0;
+let scale = Math.min(canvas.width, canvas.height) / 35;
+
+function draw(){
+  if(idx >= points.length){
+    document.getElementById('love').style.opacity = '1';
+    return;
+  }
+  ctx.fillStyle = 'black';
+  if(idx==0) ctx.fillRect(0,0,canvas.width,canvas.height);
+  
+  let p = points[idx];
+  let cx = canvas.width/2 + p.x * scale;
+  let cy = canvas.height/2 + p.y * scale - 40;
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
+  ctx.fillStyle = '#ff0015';
+  ctx.shadowColor = '#ff0015';
+  ctx.shadowBlur = 15;
+  ctx.fill();
+  
+  // glow trail
+  ctx.beginPath();
+  ctx.arc(cx, cy, 1.5, 0, Math.PI*2);
+  ctx.fillStyle = '#ff8a9a';
+  ctx.fill();
+
+  idx += 2;
+  requestAnimationFrame(draw);
+}
+draw();
+
+window.onresize = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 0.85;
+  scale = Math.min(canvas.width, canvas.height) / 35;
+}
+</script>
 """, unsafe_allow_html=True)
