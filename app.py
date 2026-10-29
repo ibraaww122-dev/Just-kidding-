@@ -5,44 +5,39 @@ st.set_page_config(page_title="LOVE YOU ❤️", page_icon="❤️", layout="cen
 st.markdown("<style>.stApp{background:black;} header,footer{visibility:hidden;}</style>", unsafe_allow_html=True)
 
 components.html("""
-<div style="background:black; width:100%; height:680px; position:relative;">
+<div style="background:black; width:100%; height:700px; position:relative;">
   <canvas id="c" style="width:100%; height:100%;"></canvas>
-  <div style="position:absolute; top:58%; left:50%; transform:translate(-50%,-50%); color:#fff8dc; font-family:Georgia, serif; font-weight:bold; font-size:24px; letter-spacing:1px;">LOVE YOU.</div>
+  <div style="position:absolute; top:60%; left:50%; transform:translate(-50%,-50%); color:#fff8dc; font-family:Georgia, serif; font-weight:bold; font-size:27px; letter-spacing:2px; text-shadow:0 0 15px #fff;">LOVE YOU.</div>
 </div>
 <script>
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-canvas.width = 800;
-canvas.height = 680;
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+canvas.width=500;
+canvas.height=700;
 
-let points=[];
-for(let t=0; t<Math.PI*2; t+=0.03){
-  let x = 16*Math.pow(Math.sin(t),3);
-  let y = -(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
-  points.push({x,y});
+let pts=[];
+for(let t=0; t<6.28; t+=0.06){
+  let x=16*Math.pow(Math.sin(t),3);
+  let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+  pts.push({x,y});
 }
 
-let idx=0;
-let scale=18;
+let i=0;
+let scale=13.5;
 
 function draw(){
-  if(idx >= points.length) return;
+  if(i>=pts.length) return;
+  let p=pts[i];
+  let cx=canvas.width/2 + p.x*scale;
+  let cy=canvas.height/2 + p.y*scale - 10;
   
-  // gambar 2 lapis biar tebal kayak di video
-  for(let k=0;k<2;k++){
-    let p = points[idx];
-    let offset = k*0.5;
-    let cx = canvas.width/2 + (p.x+offset)*scale;
-    let cy = canvas.height/2 + (p.y+offset)*scale - 20;
-    
-    ctx.fillStyle = k==0 ? "#ff0a4a" : "#ff5a8a";
-    ctx.font = "bold 9px Arial";
-    ctx.fillText("LOVE", cx, cy);
-  }
+  ctx.fillStyle="#ff2a5e";
+  ctx.font="bold 11px Courier New";
+  ctx.fillText("LOVE", cx, cy);
   
-  idx++;
-  setTimeout(()=>requestAnimationFrame(draw), 20);
+  i++;
+  setTimeout(draw, 130); // <-- INI KUNCINYA! 130ms = PELAN BANGET kayak video
 }
 draw();
 </script>
-""", height=700)
+""", height=720)
