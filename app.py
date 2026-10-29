@@ -22,11 +22,9 @@ components.html("""
     </div>
   </div>
 
-  <div id="flowerText" style="display:none; position:absolute; top:8%; left:50%; transform:translateX(-50%); color:#ffb0d0; font-family:Georgia; font-style:italic; font-size:18px; text-align:center; z-index:10; text-shadow:0 0 10px #ff8ab0; width:90%;">This flower is for you,<br>beautiful girl 🌸</div>
-  <div id="bouquetWrap" style="display:none; position:absolute; top:18%; left:50%; transform:translateX(-50%); width:90%; max-width:340px; z-index:5; text-align:center;"></div>
-  
+  <div id="flowerText" style="display:none; position:absolute; top:10%; left:50%; transform:translateX(-50%); color:#ffb0d0; font-family:Georgia; font-style:italic; font-size:18px; text-align:center; z-index:10; text-shadow:0 0 15px #ff8ab0; width:90%;">This flower is for you,<br>beautiful girl 🌸</div>
+  <div id="backBtn" style="display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#666; cursor:pointer; font-size:12px; z-index:10;">← Back</div>
   <div id="loveText" style="position:absolute; top:68%; left:50%; transform:translate(-50%,-50%); color:#fff8dc; font-family:Georgia; font-weight:bold; font-size:28px; text-align:center; opacity:0; transition:1s; z-index:5;">LOVE<br>YOU.</div>
-  <div id="backBtn" style="display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#888; cursor:pointer; font-size:12px; z-index:10;">← Back to gifts</div>
 </div>
 
 <script>
@@ -38,67 +36,92 @@ function clearAll(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   document.getElementById('loveText').style.opacity=0;
   document.getElementById('flowerText').style.display='none';
-  document.getElementById('bouquetWrap').style.display='none';
-  document.getElementById('bouquetWrap').innerHTML='';
 }
 
-// BUNGA MUNCUL SATU-SATU CEPET - BUKET SUNFLOWER + PEACH ROSE
-function drawBouquet(){
+function drawFlowerBloom(){
   clearAll();
   document.getElementById('flowerText').style.display='block';
-  const wrap=document.getElementById('bouquetWrap');
-  wrap.style.display='block';
+  const cx=canvas.width/2;
+  const cy=canvas.height/2 + 40;
   
-  // 8 bunga yang muncul satu-satu membentuk buket
-  const flowers = [
-    {e:'🌻', x:0, y:0, s:70},
-    {e:'🌹', x:-60, y:20, s:55},
-    {e:'🌻', x:60, y:25, s:65},
-    {e:'🌹', x:0, y:50, s:60},
-    {e:'🌻', x:-40, y:70, s:50},
-    {e:'🌹', x:50, y:75, s:55},
-    {e:'🌼', x:-20, y:30, s:30},
-    {e:'🌼', x:30, y:50, s:25}
-  ];
+  let petalIndex=0;
+  const totalPetals=16;
   
-  let i=0;
-  function pop(){
-    if(i>=flowers.length){
-      // muncul bucket/wrapping di akhir
-      const bucket=document.createElement('div');
-      bucket.innerHTML='<div style="margin-top:140px; background:linear-gradient(#111,#000); border:1px solid #333; border-radius:10px 10px 80px 80px; padding:15px 10px 25px; color:#555; font-size:11px; letter-spacing:2px;">● FROM IBRA ●</div>';
-      bucket.style.animation='pop 0.5s';
-      wrap.appendChild(bucket);
+  function drawPetal(angle, scale){
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    // Bentuk kelopak sunflower peach rose
+    ctx.ellipse(0, -90*scale, 28*scale, 85*scale, 0, 0, Math.PI*2);
+    let grad=ctx.createRadialGradient(0,-90*scale,10,0,-90*scale,80);
+    grad.addColorStop(0,'#FFDAB9');
+    grad.addColorStop(0.5,'#FFB088');
+    grad.addColorStop(1,'#FF8A65');
+    ctx.fillStyle=grad;
+    ctx.shadowColor='#FF8A65';
+    ctx.shadowBlur=15*scale;
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+  
+  function bloom(){
+    if(petalIndex>=totalPetals){
+      // tengah bunga sunflower
+      ctx.beginPath();
+      ctx.arc(cx, cy, 45, 0, Math.PI*2);
+      let g=ctx.createRadialGradient(cx-10, cy-10, 5, cx, cy, 45);
+      g.addColorStop(0,'#FFD700');
+      g.addColorStop(0.3,'#FFA000');
+      g.addColorStop(1,'#5D4037');
+      ctx.fillStyle=g;
+      ctx.shadowColor='#FFD700';
+      ctx.shadowBlur=20;
+      ctx.fill();
+      ctx.shadowBlur=0;
+      
+      // titik-titik biji
+      for(let i=0;i<80;i++){
+        let a=Math.random()*Math.PI*2;
+        let r=Math.random()*35;
+        ctx.beginPath();
+        ctx.arc(cx+Math.cos(a)*r, cy+Math.sin(a)*r, 1.5,0,Math.PI*2);
+        ctx.fillStyle='#3E2723';
+        ctx.fill();
+      }
       return;
     }
-    const f=flowers[i];
-    const d=document.createElement('div');
-    d.textContent=f.e;
-    d.style.position='absolute';
-    d.style.left='50%';
-    d.style.top='50%';
-    d.style.fontSize=f.s+'px';
-    d.style.transform=`translate(calc(-50% + ${f.x}px), calc(-50% + ${f.y}px)) scale(0)`;
-    d.style.transition='0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-    d.style.filter='drop-shadow(0 0 10px rgba(255,200,0,0.5))';
-    wrap.appendChild(d);
-    setTimeout(()=>{ d.style.transform=`translate(calc(-50% + ${f.x}px), calc(-50% + ${f.y}px)) scale(1)`; }, 10);
-    i++;
-    setTimeout(pop, 250); // CEPET, 0.25 detik per bunga!
+    let angle=(petalIndex/totalPetals)*Math.PI*2;
+    let scale=0.6 + (petalIndex/totalPetals)*0.5;
+    drawPetal(angle, scale);
+    petalIndex++;
+    setTimeout(bloom, 90); // CEPET! 0.09 detik per kelopak
   }
-  pop();
+  bloom();
+  
+  // batang
+  setTimeout(()=>{
+    ctx.beginPath();
+    ctx.moveTo(cx, cy+45);
+    ctx.lineTo(cx, canvas.height-50);
+    ctx.strokeStyle='#4A7C59';
+    ctx.lineWidth=8;
+    ctx.lineCap='round';
+    ctx.stroke();
+  }, totalPetals*90 + 100);
 }
 
 function drawLove(){
   clearAll();
-  let pts=[]; for(let t=0;t<Math.PI*2;t+=0.07){ let x=16*Math.pow(Math.sin(t),3); let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); pts.push({x,y}); }
+  let pts=[]; for(let t=0;t<Math.PI*2;t+=0.06){ let x=16*Math.pow(Math.sin(t),3); let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); pts.push({x,y}); }
   let i=0; let scale=16;
-  function d(){ if(i>=pts.length){ document.getElementById('loveText').style.opacity=1; return; } let p=pts[i]; ctx.fillStyle="#ff2a5e"; ctx.font="bold 9px Courier New"; ctx.textAlign="center"; ctx.fillText("I LOVE YOU", canvas.width/2+p.x*scale, canvas.height/2+p.y*scale-80); i++; setTimeout(d,60); } d();
+  function d(){ if(i>=pts.length){ document.getElementById('loveText').style.opacity=1; return; } let p=pts[i]; ctx.fillStyle="#ff2a5e"; ctx.font="bold 9px Courier New"; ctx.textAlign="center"; ctx.fillText("I LOVE YOU", canvas.width/2+p.x*scale, canvas.height/2+p.y*scale-80); i++; setTimeout(d,50); } d();
 }
 
 document.getElementById('openBtn').onclick=()=>{ document.getElementById('layer1').style.display='none'; document.getElementById('layer2').style.display='block'; };
-document.getElementById('gift1').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawBouquet(); document.getElementById('backBtn').style.display='block'; };
+document.getElementById('gift1').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawFlowerBloom(); document.getElementById('backBtn').style.display='block'; };
 document.getElementById('gift2').onclick=()=>{ document.getElementById('layer2').style.display='none'; drawLove(); document.getElementById('backBtn').style.display='block'; };
 document.getElementById('backBtn').onclick=()=>{ clearAll(); document.getElementById('backBtn').style.display='none'; document.getElementById('layer2').style.display='block'; };
 </script>
-""", height=820)
+""", height=820)8
