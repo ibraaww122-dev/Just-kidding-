@@ -13,7 +13,7 @@
 </style>
 </head>
 <body>
-<div id="click"><span>💖 KLIK UNTUK MULAI 💖</span></div>
+<div id="click"><span>KLIK UNTUK MULAI</span></div>
 <canvas id="c"></canvas>
 <script>
 const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
@@ -21,50 +21,42 @@ let W,H;
 function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
 resize(); addEventListener('resize',resize);
 
-// ===== MATRIX RAIN BACKGROUND =====
-const cols=Math.floor(innerWidth/16);
 let drops=[];
-for(let i=0;i<cols;i++) drops[i]=Math.random()*-50;
+for(let i=0;i<Math.floor(innerWidth/16);i++) drops[i]=Math.random()*-50;
 const chars="ILOVEYOU".split("");
 function drawMatrix(){
   ctx.fillStyle="rgba(0,0,0,0.12)";
   ctx.fillRect(0,0,W,H);
   ctx.font="14px monospace";
   for(let i=0;i<drops.length;i++){
-    const ch=chars[Math.floor(Math.random()*chars.length)];
     ctx.fillStyle="rgba(255,255,255,0.35)";
-    ctx.fillText(ch,i*16,drops[i]*16);
+    ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,drops[i]*16);
     if(drops[i]*16>H && Math.random()>0.975) drops[i]=0;
     drops[i]++;
   }
 }
 
-// ===== PARTICLE TEXT =====
-let particles=[], state="IDLE", finalHeart=false, textOpacity=0;
+let particles=[], state="IDLE", textOpacity=0;
 class Particle{
   constructor(tx,ty){
     this.x=Math.random()*W; this.y=Math.random()*H;
     this.tx=tx; this.ty=ty;
     this.vx=(Math.random()-0.5)*12; this.vy=(Math.random()-0.5)*12;
     this.size=Math.random()*2+1;
-    this.active=true;
   }
   update(){
     if(state==="EXPLODE"){ this.x+=this.vx; this.y+=this.vy; this.vx*=0.98; this.vy*=0.98; return; }
-    const dx=this.tx-this.x, dy=this.ty-this.y;
-    this.x+=dx*0.08; this.y+=dy*0.08;
+    this.x+=(this.tx-this.x)*0.08; this.y+=(this.ty-this.y)*0.08;
   }
   draw(){
-    ctx.fillStyle="rgba(255,255,255,0.95)";
+    ctx.fillStyle="#fff";
     ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
   }
 }
-
-function getPoints(text, fontSize){
-  const off=document.createElement('canvas');
-  off.width=W; off.height=H;
+function getPoints(text, fs){
+  const off=document.createElement('canvas'); off.width=W; off.height=H;
   const octx=off.getContext('2d');
-  octx.fillStyle="#fff"; octx.font=`900 ${fontSize}px Arial`;
+  octx.fillStyle="#fff"; octx.font="900 "+fs+"px Arial";
   octx.textAlign="center"; octx.textBaseline="middle";
   octx.fillText(text, W/2, H/2);
   const data=octx.getImageData(0,0,W,H).data;
@@ -75,70 +67,51 @@ function getPoints(text, fontSize){
   return pts;
 }
 function setText(text){
-  const fs=Math.min(W/3.5, 220);
-  const pts=getPoints(text, fs);
-  particles=[];
-  pts.forEach(p=>particles.push(new Particle(p[0],p[1])));
+  const pts=getPoints(text, Math.min(W/3.5, 220));
+  particles=[]; pts.forEach(p=>particles.push(new Particle(p[0],p[1])));
   state="FORM";
 }
-function getHeartPoints(){
+function setHeart(){
   const pts=[];
   for(let t=0;t<Math.PI*2;t+=0.02){
     const x=16*Math.pow(Math.sin(t),3);
     const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
-    const sx=W/2 + x*(Math.min(W,H)/32);
-    const sy=H/2 - y*(Math.min(W,H)/32);
-    pts.push([sx,sy]);
+    pts.push([W/2 + x*(Math.min(W,H)/32), H/2 - y*(Math.min(W,H)/32)]);
   }
-  // isi biar padat
   for(let i=0;i<800;i++){
     const t=Math.random()*Math.PI*2, r=Math.random();
     const x=16*Math.pow(Math.sin(t),3)*r;
     const y=(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*r;
     pts.push([W/2 + x*(Math.min(W,H)/32), H/2 - y*(Math.min(W,H)/32)]);
   }
-  return pts;
+  particles=[]; pts.forEach(p=>particles.push(new Particle(p[0],p[1])));
+  state="FORM";
 }
-function setHeart(){
-  const pts=getHeartPoints();
-  particles=[];
-  pts.forEach(p=>particles.push(new Particle(p[0],p[1])));
-  state="FORM"; finalHeart=true;
-}
-function explode(){ state="EXPLODE"; setTimeout(()=>{state="IDLE";},900); }
+function explode(){ state="EXPLODE"; setTimeout(()=>{state="IDLE"},900); }
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
-
-async function startSequence(){
+async function start(){
   document.getElementById('click').style.display='none';
-  for(const txt of ["3","2","1"]){
-    setText(txt); await sleep(1300); explode(); await sleep(700);
-  }
-  for(const word of ["You","Are","My","Love"]){
-    setText(word); await sleep(1800); explode(); await sleep(600);
-  }
+  for(const txt of ["3","2","1"]){ setText(txt); await sleep(1300); explode(); await sleep(700); }
+  for(const word of ["You","Are","My","Love"]){ setText(word); await sleep(1800); explode(); await sleep(600); }
   setHeart();
-  // tunggu hati terbentuk lalu muncul teks
-  setTimeout(()=>{ state="FINAL_HEART"; }, 1500);
+  setTimeout(()=>{ state="FINAL_HEART"; },1500);
 }
-
-function drawFinalText(){
-  if(textOpacity<1) textOpacity+=0.01;
-  ctx.font=`bold ${Math.min(W/22,28)}px Arial`;
-  ctx.textAlign="center"; ctx.textBaseline="middle";
-  ctx.fillStyle=`rgba(255,255,255,${textOpacity})`;
-  ctx.fillText("I LOVE YOU SAYANG ♥", W/2, H/2);
-}
-
 function draw(){
   drawMatrix();
   if(state==="FORM" || state==="EXPLODE" || state==="FINAL_HEART"){
     particles.forEach(p=>{p.update(); p.draw();});
   }
-  if(state==="FINAL_HEART") drawFinalText();
+  if(state==="FINAL_HEART"){
+    if(textOpacity<1) textOpacity+=0.01;
+    ctx.font="bold "+Math.min(W/22,28)+"px Arial";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillStyle="rgba(255,255,255,"+textOpacity+")";
+    ctx.fillText("I LOVE YOU SAYANG", W/2, H/2);
+  }
   requestAnimationFrame(draw);
 }
 draw();
-document.getElementById('click').addEventListener('click', startSequence);
+document.getElementById('click').addEventListener('click', start);
 </script>
 </body>
 </html>
